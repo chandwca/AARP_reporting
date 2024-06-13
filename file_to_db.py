@@ -1,12 +1,12 @@
+import re
 import pandas as pd
-from db_config import HOST, DATABASE, SQL_DATABASE_NAME, SQL_HOST, SQL_PASSWORD, SQL_USERNAME, USER, PASSWORD
+from db_config import HOST, DATABASE, HOST, PASSWORD,USER,DEV_USERNAME,DEV_PASSWORD,DEV_HOST,DEV_DATABASE
 from sqlalchemy import create_engine
 from constants import consistent_order
 import zipfile
 import os
 
-output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
-
+output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
 
 def preprocess_columns(columns):
     new_columns = []  
@@ -28,11 +28,8 @@ def preprocess_columns(columns):
                 new_columns.append(f"LOY_{col[1]}")
             elif '-AAA' in current:
                 new_columns.append(f"AAA_{col[1]}")
-
-            # new_columns.append(f'{col[0]}_{col[1]}')
     print(new_columns)
     return new_columns
-
 
 def preprocess_excel(file_path):
     
@@ -44,16 +41,20 @@ def preprocess_excel(file_path):
     print(df)
     return df
 
+def insert_into_mysql(df,table_name):
+    engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
+    # engine = f"mssql+pyodbc://{DEV_USERNAME}:{DEV_PASSWORD}@{DEV_HOST}/{DEV_DATABASE}?driver=ODBC+Driver+17+for+SQL+Server"
 
-def insert_into_mysql(df):
-    # change to mssql
-    # engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
-    # engine = f"mssql+pyodbc://{connection_data.username}:{(connection_data.password)}@{connection_data.serverIP}:{connection_data.port}/{connection_data.databaseName}?driver=ODBC+Driver+17+for+SQL+Server"
-    DRIVER_PATH = "/opt/homebrew/Cellar/msodbcsql17/17.10.6.1/lib/libmsodbcsql.17.dylib"
-    engine = create_engine(f'mssql+pyodbc://{SQL_USERNAME}:{SQL_PASSWORD}@{SQL_HOST}/{SQL_DATABASE_NAME}?driver=Microsoft+SQL+Server&Driver={DRIVER_PATH}')
-    df.to_sql('western', con=engine, if_exists='replace', index=False)
-    print(f'Data inserted into western successfully.')
-
+    # df.to_sql("CHOICE", con=engine,schema='dbo', if_exists='replace', index=False)
+    df.to_sql(table_name, con=engine, if_exists='replace', index=False)
+    
+    print(f'Data inserted into choice successfully.')
+    
+def extract_table_name(zip_filename):
+    match = re.search(r'AARP_(.*?)_', zip_filename)
+    if match:
+        return match.group(1).upper()
+    return None
 
 def extract_from_excel(zip_path, extract_to='.'):
     try:
@@ -69,24 +70,25 @@ def extract_from_excel(zip_path, extract_to='.'):
                         return df
     except Exception as e:
         print(f"Exception: {e}")
-
-
+    
 def process_multiple_zips(zip_dir):
     all_data_frames = []
-    # print(os.listdir(zip_dir))
+    table_name = None
     for zip_file in os.listdir(zip_dir):
         if zip_file.endswith('.zip'):
             zip_path = os.path.join(zip_dir, zip_file)
-            # print("zip path: ", zip_path)
             try:
+                if table_name is None:
+                    table_name = extract_table_name(zip_file)
+                    print(f"Extracted table name: {table_name}")
                 df = extract_from_excel(zip_path)
                 all_data_frames.append(df)
             except Exception as e:
                 print(f"Failed to process {zip_file}: {e}")
-    if all_data_frames:
+    if all_data_frames and table_name:
         combined_df = pd.concat(all_data_frames, ignore_index=True)
         print(combined_df)
-        insert_into_mysql(combined_df)
+        insert_into_mysql(combined_df, table_name)
     return all_data_frames
 
 
@@ -95,16 +97,11 @@ def main():
     # file_path = '/Users/subashinibalasubramanian/Documents/AARP/AARP_Choice_Brand AARP vs Brand other rataplan_OCTOBER_2023 2/Rate Report-2023-10-02-17495399.xlsx'
     # table_name = input("Enter the table name: ")
     # df = preprocess_excel(file_path)
-
     # insert_into_mysql(df, table_name)
-    zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/western_zip_files'
+    zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
     data_frames = process_multiple_zips(zip_dir)    
 
 if __name__ == "__main__":
     main()
-    
-    
-    
-    # 1.combine the reports
-    # 2."closed"-> 999.99
+
     
