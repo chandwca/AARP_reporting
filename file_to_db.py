@@ -48,7 +48,7 @@ def insert_into_mysql(df,table_name):
     # df.to_sql("CHOICE", con=engine,schema='dbo', if_exists='replace', index=False)
     df.to_sql(table_name, con=engine, if_exists='replace', index=False)
     
-    print(f'Data inserted into choice successfully.')
+    print(f'Data inserted into {table_name} successfully.')
     
 def extract_table_name(zip_filename):
     match = re.search(r'AARP_(.*?)_', zip_filename)
@@ -91,6 +91,16 @@ def process_multiple_zips(zip_dir):
         insert_into_mysql(combined_df, table_name)
     return all_data_frames
 
+
+# ******************Row count from DB*********************
+def get_row_count_from_db(table_name):
+    engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
+    query = f"SELECT COUNT(*) FROM {table_name}"
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        row_count = result.fetchone()[0]
+    return row_count
+# **********************************************************
 
 def main():
     # file_path = '/Users/chetnachandwani/Downloads/AARP_choice/Rate Report-2024-05-06-25158668.xlsx'

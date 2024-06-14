@@ -1,0 +1,29 @@
+1.Automate the table name - Done Test it
+2.Automate the location - 
+3.get user prompt for database
+4.Include cloud folders(AWS)
+5.unit Testing
+
+
+In the config have the path to the folder that has all zip file of each month
+
+for now the table table is configured for AAPR,
+to make it generic 
+                def extract_table_name(zip_filename, prefix='AARP_', suffix='_'):
+                    pattern = re.escape(prefix) + r'(.*?)' + re.escape(suffix)
+                    match = re.search(pattern, zip_filename)
+                    if match:
+                        return match.group(1).replace(' ', '_').upper()
+                    return None
+Test cases:
+    1.The Sum of number of Row and columns and each file should be equal to the number of records in the database
+    2.Check if the columns names are processed right
+    3.Check the Rate values for each AAA,BAR,Loyalty and Benchmark for a few for random sample ID
+       
+       Select Rate from table where id =""
+        if 
+    4.Check for invalid XLSX sheets
+    5.Check if get the right table name
+    6.Check for Lowest
+
+
