@@ -1,12 +1,13 @@
 import re
 import pandas as pd
 from db_config import HOST, DATABASE, HOST, PASSWORD,USER,DEV_USERNAME,DEV_PASSWORD,DEV_HOST,DEV_DATABASE
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,text
 from constants import consistent_order
 import zipfile
 import os
 
 output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
+# output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
 
 def preprocess_columns(columns):
     new_columns = []  
@@ -87,31 +88,17 @@ def process_multiple_zips(zip_dir):
                 print(f"Failed to process {zip_file}: {e}")
     if all_data_frames and table_name:
         combined_df = pd.concat(all_data_frames, ignore_index=True)
+        print("dtypes",combined_df.dtypes)
         print(combined_df)
         insert_into_mysql(combined_df, table_name)
     return all_data_frames
 
-
-# ******************Row count from DB*********************
-def get_row_count_from_db(table_name):
-    engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
-    query = f"SELECT COUNT(*) FROM {table_name}"
-    with engine.connect() as connection:
-        result = connection.execute(query)
-        row_count = result.fetchone()[0]
-    return row_count
-# **********************************************************
-
 def main():
-    # file_path = '/Users/chetnachandwani/Downloads/AARP_choice/Rate Report-2024-05-06-25158668.xlsx'
-    # file_path = '/Users/subashinibalasubramanian/Documents/AARP/AARP_Choice_Brand AARP vs Brand other rataplan_OCTOBER_2023 2/Rate Report-2023-10-02-17495399.xlsx'
-    # table_name = input("Enter the table name: ")
-    # df = preprocess_excel(file_path)
-    # insert_into_mysql(df, table_name)
     zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
-    data_frames = process_multiple_zips(zip_dir)    
-
+    # zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/western_zip_files'
+    process_multiple_zips(zip_dir)
 if __name__ == "__main__":
     main()
+
 
     

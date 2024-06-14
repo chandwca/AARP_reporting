@@ -16,7 +16,7 @@ to make it generic
                         return match.group(1).replace(' ', '_').upper()
                     return None
 Test cases:
-    1.The Sum of number of Row and columns and each file should be equal to the number of records in the database
+    1.The Sum of number of Row in each file should be equal to the number of records in the database
     2.Check if the columns names are processed right
     3.Check the Rate values for each AAA,BAR,Loyalty and Benchmark for a few for random sample ID
        
@@ -25,5 +25,20 @@ Test cases:
     4.Check for invalid XLSX sheets
     5.Check if get the right table name
     6.Check for Lowest
+
+
+Test case
+1.Attribute of header
+2.order of the columns
+3.Number of records  in fail and table - For a particular month
+ Where month effective date 
+ Select count(*) from <table name> where monthEffectiveDate = "May"
+4.Key attributes check- Mandatory attributes 
+5.Check if there are null values
+6.Check for duplicates
+7.Check if AARP is lowest rate
+8.Uniquness of the records-Composite Key(combine two or three attribute) - grain of the table
+row number
+
 
 
