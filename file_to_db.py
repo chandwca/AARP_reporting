@@ -6,8 +6,8 @@ from constants import consistent_order
 import zipfile
 import os
 
-output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
-# output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
+# output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
+output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
 
 def preprocess_columns(columns):
     new_columns = []  
@@ -39,16 +39,13 @@ def preprocess_excel(file_path):
     rate_columns = df.filter(regex='_Rate$').columns
     df[rate_columns] = df[rate_columns].replace("Closed", 9999.99)
     df = df.reindex(columns=consistent_order)
-    print(df)
     return df
 
 def insert_into_mysql(df,table_name):
-    engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
-    # engine = f"mssql+pyodbc://{DEV_USERNAME}:{DEV_PASSWORD}@{DEV_HOST}/{DEV_DATABASE}?driver=ODBC+Driver+17+for+SQL+Server"
-
+    # engine = create_engine(f'mysql+mysqlconnector://{USER}:{PASSWORD}@{HOST}/{DATABASE}')
+    engine = f"mssql+pyodbc://{DEV_USERNAME}:{DEV_PASSWORD}@{DEV_HOST}/{DEV_DATABASE}?driver=ODBC+Driver+17+for+SQL+Server"
     # df.to_sql("CHOICE", con=engine,schema='dbo', if_exists='replace', index=False)
-    df.to_sql(table_name, con=engine, if_exists='replace', index=False)
-    
+    df.to_sql(table_name, con=engine, if_exists='replace', index=False) 
     print(f'Data inserted into {table_name} successfully.')
     
 def extract_table_name(zip_filename):
@@ -88,14 +85,12 @@ def process_multiple_zips(zip_dir):
                 print(f"Failed to process {zip_file}: {e}")
     if all_data_frames and table_name:
         combined_df = pd.concat(all_data_frames, ignore_index=True)
-        print("dtypes",combined_df.dtypes)
-        print(combined_df)
-        insert_into_mysql(combined_df, table_name)
+        # insert_into_mysql(combined_df, table_name)
     return all_data_frames
 
 def main():
-    zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
-    # zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/western_zip_files'
+    # zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
+    zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/choice_zip_files'
     process_multiple_zips(zip_dir)
 if __name__ == "__main__":
     main()
