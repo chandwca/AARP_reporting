@@ -3,11 +3,9 @@ import pandas as pd
 from file_to_db import process_multiple_zips, extract_table_name,preprocess_excel
 from db_config import HOST, DATABASE, PASSWORD, USER, DEV_USERNAME, DEV_PASSWORD, DEV_HOST, DEV_DATABASE
 import os
-from sqlalchemy import create_engine,text, inspect
+from sqlalchemy import create_engine,text
 import pandas as pd
 from constants import consistent_order
-
-
 
 class TestBase(unittest.TestCase):
     @classmethod
@@ -114,17 +112,15 @@ class TestRateValues(TestBase):
 
             with self.engine.connect() as connection:
                 result = connection.execute(db_values_query)
-                db_rows = result.fetchall()  # Fetch all rows returned by the query
+                db_rows = result.fetchall()
 
             for i, db_row in enumerate(db_rows):
                 with self.subTest(row=i):
-                    # Convert db_row values to float before comparison
                     db_bm_rate = float(db_row[0])
                     db_bar_rate = float(db_row[1])
                     db_aaa_rate = float(db_row[2])
                     db_loy_rate = float(db_row[3])
 
-                    # Compare each rate with expected values
                     self.assertAlmostEqual(db_bm_rate, self.expected_first_five['BM_Rate'][i], places=2,
                                             msg=f"BM_Rate for row {i} in Database does not match expected value")
                     self.assertAlmostEqual(db_bar_rate, self.expected_first_five['BAR_Rate'][i], places=2,
