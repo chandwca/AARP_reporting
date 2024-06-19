@@ -8,6 +8,7 @@ import os
 
 # output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
 output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
+pd.set_option('future.no_silent_downcasting', True)
 
 def preprocess_columns(columns):
     new_columns = []  
@@ -29,7 +30,7 @@ def preprocess_columns(columns):
                 new_columns.append(f"LOY_{col[1]}")
             elif '-AAA' in current:
                 new_columns.append(f"AAA_{col[1]}")
-    print(new_columns)
+    # print(new_columns)
     return new_columns
 
 def preprocess_excel(file_path):
@@ -47,7 +48,7 @@ def insert_into_mysql(df,table_name):
     # df.to_sql("CHOICE", con=engine,schema='dbo', if_exists='replace', index=False)
     df.to_sql(table_name, con=engine, if_exists='replace', index=False) 
     print(f'Data inserted into {table_name} successfully.')
-    
+
 def extract_table_name(zip_filename):
     match = re.search(r'AARP_(.*?)_', zip_filename)
     if match:
@@ -86,7 +87,7 @@ def process_multiple_zips(zip_dir):
     if all_data_frames and table_name:
         combined_df = pd.concat(all_data_frames, ignore_index=True)
         # insert_into_mysql(combined_df, table_name)
-    return all_data_frames
+    return combined_df
 
 def main():
     # zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
