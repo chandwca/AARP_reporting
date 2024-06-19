@@ -57,17 +57,6 @@ class TestRecordCountComparison(TestBase):
         self.assertEqual(df_count, db_count, f"Record counts do not match for {self.month_year}: DataFrame count = {df_count}, DB count = {db_count}")
         print(f"Record counts match for {self.month_year}: DataFrame count = {df_count}, DB count = {db_count}")
 
-# class TestColumnCountComparison(TestBase):
-#     def test_column_count(self):
-#         try:
-#             query = text(f"SELECT * FROM {self.table_name} WHERE 1=0")
-#             with self.engine.connect() as connection:
-#                 result = connection.execute(query)
-#                 db_column_count = len(result.keys())
-#             df_column_count = self.data_frames[0].shape[1] if self.data_frames else 0
-#             self.assertEqual(db_column_count, df_column_count, f"Column counts do not match")
-#         except Exception as e:
-#             print(e)
 
 class TestColumnHeadersComparison(TestBase):
     def test_column_headers_comparison(self):
@@ -153,6 +142,7 @@ class TestColumnCountComparison(TestBase):
                 db_column_count = len(result.keys())
                 df_column_count = self.data_frames.shape[1]
                 self.assertEqual(db_column_count, df_column_count, msg=f"Column counts does not match. File has {df_column_count} columns and table in DB has {db_column_count} columnss")
+                print(f"Column count in the dataframe and table match: {db_column_count}")
         except Exception as e:
             print(f"Exception occurred in test_column_count: {e}")
             raise
@@ -186,6 +176,7 @@ class TestDatatypesComparison(TestBase):
             for col in sql_dtypes_normalized:
                 if col not in df_dtypes_normalized:
                     self.fail(f"Column {col} found in SQL table but not in DataFrame")
+            print("All the column data types match for the dataframe and table")
         except Exception as e:
             print(f"Exception occurred in test_datatypes: {e}")
             raise
@@ -227,7 +218,8 @@ class TestClosedRatesCheck(TestBase):
                     count = result[0]
                     if count > 0:
                         columns.append(column)
-                    self.assertEqual(count, 0, msg=f"Rates contains closed value {columns}")       
+                    self.assertEqual(count, 0, msg=f"Rates contains closed value {columns}")   
+            print("The Rate values in the table does not contain any 'Closed' values")    
         except Exception as e:
             print(f"Exception occurred in test_closed_rate: {e}")
             raise
@@ -246,6 +238,7 @@ class TestKeyAttributesNullCheck(TestBase):
                 if null_count > 0:
                     null_columns.append(column)
             self.assertEqual(len(null_columns), 0, msg=f"Columns {null_columns} contains null values") 
+            print("The Key attributes does not contain any null values")
         except Exception as e:
             print(f"Exception occurred in test_key_attributes null check: {e}")
             raise
