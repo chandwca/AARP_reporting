@@ -6,16 +6,9 @@ from constants import consistent_order
 import zipfile
 import os
 
-<<<<<<< HEAD
 output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
 # output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
 pd.set_option('future.no_silent_downcasting', True)
-=======
-# output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
-output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
-pd.set_option('future.no_silent_downcasting', True)
-
->>>>>>> 3cc840e6acfa04629a6311109bd5462b37e3e741
 def preprocess_columns(columns):
     new_columns = []  
     for col in columns:
@@ -92,7 +85,6 @@ def process_multiple_zips(zip_dir):
     if all_data_frames and table_name:
         combined_df = pd.concat(all_data_frames, ignore_index=True)
         duplicate = combined_df[combined_df.duplicated()]
-        print("duplicated",duplicate)
         combined_df = combined_df.drop_duplicates()
         # insert_into_mysql(combined_df, table_name)
     return combined_df

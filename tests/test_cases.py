@@ -20,6 +20,12 @@ class TestBase(unittest.TestCase):
         cls.month_year = 'February_2024'
         cls.key_attributes = ['Customer_Hotel_ID', 'Check-In-Date', 'BM_Rate', 'AAA_Rate', 'BAR_Rate', 'LOY_Rate']
         cls.columns_to_check = ['BM_Rate', 'AAA_Rate', 'BAR_Rate', 'LOY_Rate']
+        cls.expected_first_five = {
+            'BM_Rate': [9999.9899999999998, 9999.9899999999998],
+            'BAR_Rate': [9999.9899999999998, 9999.9899999999998],
+            'AAA_Rate': [9999.9899999999998, 9999.9899999999998],
+            'LOY_Rate': [9999.9899999999998, 9999.9899999999998]
+        }
         
     @classmethod
     def tearDownClass(cls):
