@@ -6,9 +6,16 @@ from constants import consistent_order
 import zipfile
 import os
 
+<<<<<<< HEAD
 output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
 # output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
 pd.set_option('future.no_silent_downcasting', True)
+=======
+# output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
+output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
+pd.set_option('future.no_silent_downcasting', True)
+
+>>>>>>> 3cc840e6acfa04629a6311109bd5462b37e3e741
 def preprocess_columns(columns):
     new_columns = []  
     for col in columns:
@@ -29,7 +36,7 @@ def preprocess_columns(columns):
                 new_columns.append(f"LOY_{col[1]}")
             elif '-AAA' in current:
                 new_columns.append(f"AAA_{col[1]}")
-    print(new_columns)
+    # print(new_columns)
     return new_columns
 
 def preprocess_excel(file_path):
@@ -47,7 +54,7 @@ def insert_into_mysql(df,table_name):
     # df.to_sql("CHOICE", con=engine,schema='dbo', if_exists='replace', index=False)
     df.to_sql(table_name, con=engine, if_exists='replace', index=False) 
     print(f'Data inserted into {table_name} successfully.')
-    
+
 def extract_table_name(zip_filename):
     match = re.search(r'AARP_(.*?)_', zip_filename)
     if match:
