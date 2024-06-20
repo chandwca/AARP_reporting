@@ -2,12 +2,11 @@ import re
 import pandas as pd
 from db_config import HOST, DATABASE, HOST, PASSWORD,USER,DEV_USERNAME,DEV_PASSWORD,DEV_HOST,DEV_DATABASE
 from sqlalchemy import create_engine,text
-from constants import consistent_order
+from constants import consistent_order, zip_dir, output_dir, table_name
 import zipfile
 import os
 
-output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
-# output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
+
 pd.set_option('future.no_silent_downcasting', True)
 def preprocess_columns(columns):
     new_columns = []  
@@ -32,8 +31,7 @@ def preprocess_columns(columns):
     # print(new_columns)
     return new_columns
 
-def preprocess_excel(file_path):
-    
+def preprocess_excel(file_path):  
     df = pd.read_excel(file_path, sheet_name="Lowest_Rate_Report", header=[0, 1])
     df.columns = preprocess_columns(df.columns.to_flat_index())
     rate_columns = df.filter(regex='_Rate$').columns
@@ -54,45 +52,50 @@ def extract_table_name(zip_filename):
         return match.group(1).upper()
     return None
 
-def extract_from_excel(zip_path, extract_to='.'):
-    try:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            for file_info in zip_ref.infolist():       
-                # Check if the file name contains ~$
-                if '~$' not in file_info.filename:
-                    # Extract the file
-                    zip_ref.extract(file_info, output_dir)
-                    file_path = os.path.join(output_dir, file_info.filename)
-                    if file_info.filename.endswith('.xlsx') or file_info.filename.endswith('.xls'):
-                        df = preprocess_excel(file_path)
-                        return df
-    except Exception as e:
-        print(f"Exception: {e}")
-def process_multiple_zips(zip_dir):
+def read_excel_files(output_dir):
     all_data_frames = []
-    table_name = None
+    # Loop through the output directory to find Excel files
+    for root, dirs, files in os.walk(output_dir):
+        for file in files:
+             # Check if the file name contains ~$
+            if '~$' not in file:
+                if file.endswith('.xlsx') or file.endswith('.xls'):
+                    file_path = os.path.join(root, file)
+                    df = preprocess_excel(file_path)
+                    all_data_frames.append(df)
+    if all_data_frames:
+        combined_df = pd.concat(all_data_frames, ignore_index=True)
+        combined_df = combined_df.drop_duplicates()
+    return combined_df
+
+
+def extract_files_from_zip(zip_dir):  
     for zip_file in os.listdir(zip_dir):
         if zip_file.endswith('.zip'):
             zip_path = os.path.join(zip_dir, zip_file)
             try:
-                if table_name is None:
-                    table_name = extract_table_name(zip_file)
-                    print(f"Extracted table name: {table_name}")
-                df = extract_from_excel(zip_path)
-                all_data_frames.append(df)
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(output_dir)          
             except Exception as e:
-                print(f"Failed to process {zip_file}: {e}")
-    if all_data_frames and table_name:
-        combined_df = pd.concat(all_data_frames, ignore_index=True)
-        duplicate = combined_df[combined_df.duplicated()]
-        combined_df = combined_df.drop_duplicates()
-        # insert_into_mysql(combined_df, table_name)
+                print(f"Failed to extract from {zip_file}: {e}")
+    
+
+def get_combined_df():
+    extract_files_from_zip(zip_dir)
+    combined_df = read_excel_files(output_dir)
+    # insert_into_mysql(combined_df, table_name)
     return combined_df
 
+
+
 def main():
-    zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
-    # zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/choice_zip_files'
-    process_multiple_zips(zip_dir)
+    get_combined_df()
+    print("DOne")
+
+
+
+
+
 if __name__ == "__main__":
     main()
 
