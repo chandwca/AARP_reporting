@@ -1,2 +1,6 @@
-
+# zip_dir = '/Users/chetnachandwani/Documents/Projects/AARP/choice_zip_files'
+zip_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/choice_zip_files'
+# output_dir ='/Users/chetnachandwani/Documents/Projects/AARP/extracted_files'
+output_dir = '/Users/subashinibalasubramanian/Adroitts/AARP_Lifestyle/AARP_reporting/extracted_files'
+table_name = 'CHOICE'
 consistent_order = ['Report_Date','Severity','Region','Country','City','Customer_Hotel_ID','Hotel_Name','Check-In-Date','LOS','Adult','Child','Currency','Tolerance%','Overall_Cheapest_Source','Cheapest_Competitor','W/L/M','Rate/Availability','Variance','Variance%','BM_Rate','BM_Room_Type','BM_Board_Type','BM_Cancellation_Policy','BM_Shop_Time','AAA_Rate','AAA_Room_Type','AAA_Board_Type','AAA_Cancellation_Policy','AAA_Variance(%)','AAA_ShopTime','BAR_Rate','BAR_Room_Type','BAR_Board_Type','BAR_Cancellation_Policy','BAR_Variance(%)','BAR_ShopTime','LOY_Rate','LOY_Room_Type','LOY_Board_Type','LOY_Cancellation_Policy','LOY_Variance(%)','LOY_ShopTime']
