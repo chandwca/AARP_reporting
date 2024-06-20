@@ -6,6 +6,7 @@ import os
 from sqlalchemy import create_engine,text
 import pandas as pd
 from constants import consistent_order
+import json
 
 class TestBase(unittest.TestCase):
     @classmethod
@@ -24,7 +25,14 @@ class TestBase(unittest.TestCase):
             'AAA_Rate': [9999.9899999999998, 9999.9899999999998],
             'LOY_Rate': [9999.9899999999998, 9999.9899999999998]
         }
-        
+        with open('tests/expected_rates.json', 'r') as file:
+            cls.expected_rates = json.load(file)
+
+    def get_expected_rates(self, customer_hotel_id, check_in_date):
+        for record in self.expected_rates:
+            if record["Customer_Hotel_ID"] == customer_hotel_id and record["Check_In_Date"] == check_in_date:
+                return record
+        return None
     @classmethod
     def tearDownClass(cls):
         pass
@@ -90,44 +98,86 @@ class TestDuplicateRecords(TestBase):
             result = connection.execute(query)
             db_total_duplicates = result.scalar()
         return db_total_duplicates
+    
+def get_expected_rates(self, customer_hotel_id, check_in_date):
+        for record in self.expected_rates:
+            if record["Customer_Hotel_ID"] == customer_hotel_id and record["Check_In_Date"] == check_in_date:
+                return record
+        return None
+
+# class TestRateValues(TestBase):
+#     def test_compare_rates(self):
+#         for i, row in self.data_frames.iterrows():
+#             customer_hotel_id = row['Customer_Hotel_ID']
+#             print("customer_hotel_id",customer_hotel_id)
+#             check_in_date = row['Check-In-Date']
+          
+
+#         #     # Get expected rates from JSON
+#             expected_rates = self.get_expected_rates(customer_hotel_id, check_in_date)
+#             print("expected_rates")
+#         #     self.assertIsNotNone(expected_rates, f"No matching row in JSON for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+
+#         #     # Compare DataFrame values
+#         #     self.assertAlmostEqual(row['BM_Rate'], expected_rates['BM_Rate'], places=2, msg=f"BM_Rate in DataFrame does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#         #     self.assertAlmostEqual(row['BAR_Rate'], expected_rates['BAR_Rate'], places=2, msg=f"BAR_Rate in DataFrame does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#         #     self.assertAlmostEqual(row['AAA_Rate'], expected_rates['AAA_Rate'], places=2, msg=f"AAA_Rate in DataFrame does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#         #     self.assertAlmostEqual(row['LOY_Rate'], expected_rates['LOY_Rate'], places=2, msg=f"LOY_Rate in DataFrame does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+
+#             # Fetch rates from the database for validation
+#             db_values_query = text(f"""
+#                 SELECT BM_Rate, BAR_Rate, AAA_Rate, LOY_Rate
+#                 FROM {self.table_name}
+#                 WHERE Customer_Hotel_ID = :customer_hotel_id AND Check_In_Date = :check_in_date
+#             """)
+
+#             with self.engine.connect() as connection:
+#                 result = connection.execute(db_values_query, Customer_Hotel_ID=customer_hotel_id, Check_In_Date=check_in_date)
+#                 db_row = result.fetchone()
+
+#             self.assertIsNotNone(db_row, f"No matching row in Database for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+
+#             # Compare database values
+#             db_bm_rate = float(db_row[0])
+#             db_bar_rate = float(db_row[1])
+#             db_aaa_rate = float(db_row[2])
+#             db_loy_rate = float(db_row[3])
+
+#             self.assertAlmostEqual(db_bm_rate, expected_rates['BM_Rate'], places=2, msg=f"BM_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#             self.assertAlmostEqual(db_bar_rate, expected_rates['BAR_Rate'], places=2, msg=f"BAR_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#             self.assertAlmostEqual(db_aaa_rate, expected_rates['AAA_Rate'], places=2, msg=f"AAA_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+#             self.assertAlmostEqual(db_loy_rate, expected_rates['LOY_Rate'], places=2, msg=f"LOY_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+
 class TestRateValues(TestBase):
-        def test_compare_rates(self):
-            first_five_rows = self.data_frames.head(2)
-            for i, row in first_five_rows.iterrows():
-                with self.subTest(row=i):
-                    self.assertAlmostEqual(row['BM_Rate'], self.expected_first_five['BM_Rate'][i], places=2,
-                                        msg=f"BM_Rate for row {i} in DataFrame does not match expected value")
-                    self.assertAlmostEqual(row['BAR_Rate'], self.expected_first_five['BAR_Rate'][i], places=2,
-                                        msg=f"BAR_Rate for row {i} in DataFrame does not match expected value")
-                    self.assertAlmostEqual(row['AAA_Rate'], self.expected_first_five['AAA_Rate'][i], places=2,
-                                        msg=f"AAA_Rate for row {i} in DataFrame does not match expected value")
-                    self.assertAlmostEqual(row['LOY_Rate'], self.expected_first_five['LOY_Rate'][i], places=2,
-                                        msg=f"LOY_Rate for row {i} in DataFrame does not match expected value")
+    def test_compare_rates(self):
+        for record in self.expected_rates:
+            customer_hotel_id = record['Customer_Hotel_ID']
+            check_in_date = record['Check_In_Date']
+
+            
             db_values_query = text(f"""
-            SELECT TOP 2 BM_Rate, BAR_Rate, AAA_Rate, LOY_Rate
-            FROM {self.table_name}
-        """)
+                SELECT BM_Rate, BAR_Rate, AAA_Rate, LOY_Rate
+                FROM {self.table_name}
+                WHERE Customer_Hotel_ID = :customer_hotel_id AND [Check-In-Date] = :check_in_date
+            """)
 
             with self.engine.connect() as connection:
-                result = connection.execute(db_values_query)
-                db_rows = result.fetchall()
+                result = connection.execute(db_values_query, {'customer_hotel_id': customer_hotel_id, 'check_in_date': check_in_date})
+                db_row = result.fetchone()
 
-            for i, db_row in enumerate(db_rows):
-                with self.subTest(row=i):
-                    db_bm_rate = float(db_row[0])
-                    db_bar_rate = float(db_row[1])
-                    db_aaa_rate = float(db_row[2])
-                    db_loy_rate = float(db_row[3])
+            self.assertIsNotNone(db_row, f"No matching row in Database for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
 
-                    self.assertAlmostEqual(db_bm_rate, self.expected_first_five['BM_Rate'][i], places=2,
-                                            msg=f"BM_Rate for row {i} in Database does not match expected value")
-                    self.assertAlmostEqual(db_bar_rate, self.expected_first_five['BAR_Rate'][i], places=2,
-                                            msg=f"BAR_Rate for row {i} in Database does not match expected value")
-                    self.assertAlmostEqual(db_aaa_rate, self.expected_first_five['AAA_Rate'][i], places=2,
-                                            msg=f"AAA_Rate for row {i} in Database does not match expected value")
-                    self.assertAlmostEqual(db_loy_rate, self.expected_first_five['LOY_Rate'][i], places=2,
-                                            msg=f"LOY_Rate for row {i} in Database does not match expected value")
-        
+            # Compare database values
+            db_bm_rate = float(db_row[0])
+            db_bar_rate = float(db_row[1])
+            db_aaa_rate = float(db_row[2])
+            db_loy_rate = float(db_row[3])
+
+            self.assertAlmostEqual(db_bm_rate, record['BM_Rate'], places=2, msg=f"BM_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+            self.assertAlmostEqual(db_bar_rate, record['BAR_Rate'], places=2, msg=f"BAR_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+            self.assertAlmostEqual(db_aaa_rate, record['AAA_Rate'], places=2, msg=f"AAA_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+            self.assertAlmostEqual(db_loy_rate, record['LOY_Rate'], places=2, msg=f"LOY_Rate for row in Database does not match expected value for Customer_Hotel_ID {customer_hotel_id} and Check_In_Date {check_in_date}")
+
 class TestColumnCountComparison(TestBase):
     def test_column_count(self):
         try:
